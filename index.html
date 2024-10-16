@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist YouTube with Hash</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #videoContainer {
+            width: 560px;
+            height: 315px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
+        #playlist {
+            margin-top: 20px;
+        }
+        #playlist li {
+            cursor: pointer;
+            margin: 5px 0;
+            list-style-type: none;
+            padding: 5px;
+            background-color: #f0f0f0;
+        }
+        #playlist li:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <div id="youtubeVideo"></div> <!-- Placeholder for YouTube iframe -->
+    </div>
+    
+    <ul id="playlist"></ul> <!-- Placeholder for playlist -->
+
+    <script>
+        let player;
+        let currentVideoIndex = 0;
+        let playlistData = [];
+        const playlistElement = document.getElementById('playlist');
+
+        // Function to load JSON data
+        function loadPlaylist(hash) {
+            fetch('playlist.json')
+                .then(response => response.json())
+                .then(data => {
+                    // Get the playlist based on the hash
+                    const playlist = data[hash];
+                    if (playlist) {
+                        playlistData = playlist;
+                        currentVideoIndex = 0;
+                        loadVideo(playlistData[currentVideoIndex].videoId);
+
+                        // Display the playlist in the UI
+                        displayPlaylist(playlistData);
+                    } else {
+                        console.error('Playlist not found!');
+                    }
+                })
+                .catch(error => console.error('Error loading playlist:', error));
+        }
+
+        // Function to display playlist in the UI
+        function displayPlaylist(playlist) {
+            playlistElement.innerHTML = ''; // Clear current list
+            playlist.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item.title;
+                listItem.addEventListener('click', () => {
+                    loadVideo(item.videoId);
+                    currentVideoIndex = index;
+                });
+                playlistElement.appendChild(listItem);
+            });
+        }
+
+        // Load and play video by videoId
+        function loadVideo(videoId) {
+            if (player) {
+                player.loadVideoById(videoId);
+            } else {
+                player = new YT.Player('youtubeVideo', {
+                    height: '315',
+                    width: '560',
+                    videoId: videoId,
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+        }
+
+        // YouTube API callback function
+        function onYouTubeIframeAPIReady() {
+            // Load initial video if hash is available
+            const hash = location.hash.substring(1) || 'playlist1'; // Default to 'playlist1' if no hash
+            loadPlaylist(hash);
+        }
+
+        // Handle video state changes
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                currentVideoIndex++;
+                if (currentVideoIndex < playlistData.length) {
+                    loadVideo(playlistData[currentVideoIndex].videoId);
+                } else {
+                    // Loop to first video in playlist
+                    currentVideoIndex = 0;
+                    loadVideo(playlistData[currentVideoIndex].videoId);
+                }
+            }
+        }
+
+        // Load YouTube Iframe API script
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // Listen to hash changes to switch playlists
+        window.addEventListener('hashchange', () => {
+            const hash = location.hash.substring(1);
+            loadPlaylist(hash);
+        });
+
+        // Initialize the YouTube Iframe API once it is ready
+        window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+    </script>
+</body>
+</html>
