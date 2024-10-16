@@ -1,13 +1,12 @@
 {
   "playlist1": [
-    { "videoId": "dQw4w9WgXcQ", "title": "Video 1" },
-    { "videoId": "9bZkp7q19f0", "title": "Video 2" },
-    { "videoId": "3JZ_D3ELwOQ", "title": "Video 3" }
+    { "videoId": "dQw4w9WgXcQ" }, 
+    { "videoId": "9bZkp7q19f0" }, 
+    { "videoId": "3JZ_D3ELwOQ" }
   ],
   "playlist2": [
-    { "videoId": "tVj0ZTS4WF4", "title": "Video A" },
-    { "videoId": "RgKAFK5djSk", "title": "Video B" },
-    { "videoId": "uelHwf8o7_U", "title": "Video C" }
+    { "videoId": "tVj0ZTS4WF4" }, 
+    { "videoId": "RgKAFK5djSk" }, 
+    { "videoId": "uelHwf8o7_U" }
   ]
 }
- 
