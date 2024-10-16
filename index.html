@@ -3,52 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playlist YouTube with Hash</title>
+    <title>YouTube Playlist with Full Screen and Skip</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 20px;
         }
         #videoContainer {
             width: 560px;
             height: 315px;
             position: relative;
-            margin-bottom: 20px;
         }
         iframe {
             width: 100%;
             height: 100%;
         }
-        #playlist {
-            margin-top: 20px;
-        }
-        #playlist li {
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
             cursor: pointer;
-            margin: 5px 0;
-            list-style-type: none;
-            padding: 5px;
-            background-color: #f0f0f0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 16px;
         }
-        #playlist li:hover {
-            background-color: #ddd;
+        select {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
+
     <div id="videoContainer">
-        <div id="youtubeVideo"></div> <!-- Placeholder for YouTube iframe -->
+        <div id="youtubeVideo"></div> <!-- Placeholder YouTube -->
     </div>
-    
-    <ul id="playlist"></ul> <!-- Placeholder for playlist -->
+
+    <button id="fullscreenButton">Go Fullscreen</button>
+
+    <select id="skipToVideo">
+        <option value="">Skip to Video</option>
+    </select>
 
     <script>
         let player;
         let currentVideoIndex = 0;
         let playlistData = [];
-        const playlistElement = document.getElementById('playlist');
+        const skipToVideoSelect = document.getElementById('skipToVideo');
 
-        // Function to load JSON data
+        // Function to load playlist data from JSON based on hash
         function loadPlaylist(hash) {
             fetch('playlist.json')
                 .then(response => response.json())
@@ -59,9 +65,7 @@
                         playlistData = playlist;
                         currentVideoIndex = 0;
                         loadVideo(playlistData[currentVideoIndex].videoId);
-
-                        // Display the playlist in the UI
-                        displayPlaylist(playlistData);
+                        setupSkipToOptions(playlistData);
                     } else {
                         console.error('Playlist not found!');
                     }
@@ -69,21 +73,27 @@
                 .catch(error => console.error('Error loading playlist:', error));
         }
 
-        // Function to display playlist in the UI
-        function displayPlaylist(playlist) {
-            playlistElement.innerHTML = ''; // Clear current list
+        // Function to display 'Skip to Video' options
+        function setupSkipToOptions(playlist) {
+            skipToVideoSelect.innerHTML = '<option value="">Skip to Video</option>'; // Clear options
             playlist.forEach((item, index) => {
-                const listItem = document.createElement('li');
-                listItem.textContent = item.title;
-                listItem.addEventListener('click', () => {
-                    loadVideo(item.videoId);
-                    currentVideoIndex = index;
-                });
-                playlistElement.appendChild(listItem);
+                const option = document.createElement('option');
+                option.textContent = `Video ${index + 1}`;
+                option.value = index;
+                skipToVideoSelect.appendChild(option);
             });
         }
 
-        // Load and play video by videoId
+        // Event listener for 'Skip to Video' selection
+        skipToVideoSelect.addEventListener('change', (event) => {
+            const selectedIndex = event.target.value;
+            if (selectedIndex !== "") {
+                currentVideoIndex = parseInt(selectedIndex);
+                loadVideo(playlistData[currentVideoIndex].videoId);
+            }
+        });
+
+        // Function to load and play video by videoId
         function loadVideo(videoId) {
             if (player) {
                 player.loadVideoById(videoId);
@@ -99,40 +109,52 @@
             }
         }
 
-        // YouTube API callback function
-        function onYouTubeIframeAPIReady() {
-            // Load initial video if hash is available
-            const hash = location.hash.substring(1) || 'playlist1'; // Default to 'playlist1' if no hash
-            loadPlaylist(hash);
-        }
-
-        // Handle video state changes
+        // Handle video end state to load next video
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
                 currentVideoIndex++;
                 if (currentVideoIndex < playlistData.length) {
                     loadVideo(playlistData[currentVideoIndex].videoId);
                 } else {
-                    // Loop to first video in playlist
-                    currentVideoIndex = 0;
+                    currentVideoIndex = 0; // Loop back to first video if the playlist ends
                     loadVideo(playlistData[currentVideoIndex].videoId);
                 }
             }
         }
 
-        // Load YouTube Iframe API script
+        // Fullscreen button functionality
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        fullscreenButton.addEventListener('click', () => {
+            const videoContainer = document.getElementById('videoContainer');
+            if (videoContainer.requestFullscreen) {
+                videoContainer.requestFullscreen();
+            } else if (videoContainer.mozRequestFullScreen) {
+                videoContainer.mozRequestFullScreen(); // Firefox
+            } else if (videoContainer.webkitRequestFullscreen) {
+                videoContainer.webkitRequestFullscreen(); // Chrome, Safari, Opera
+            } else if (videoContainer.msRequestFullscreen) {
+                videoContainer.msRequestFullscreen(); // IE/Edge
+            }
+        });
+
+        // Load YouTube Iframe API
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // Listen to hash changes to switch playlists
+        // YouTube Iframe API ready callback
+        function onYouTubeIframeAPIReady() {
+            const hash = location.hash.substring(1) || 'playlist1'; // Default playlist1
+            loadPlaylist(hash);
+        }
+
+        // Hash change event to switch playlist
         window.addEventListener('hashchange', () => {
             const hash = location.hash.substring(1);
             loadPlaylist(hash);
         });
 
-        // Initialize the YouTube Iframe API once it is ready
         window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     </script>
 </body>
