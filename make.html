@@ -14,6 +14,7 @@
 </head>
 <body>
     <h2>Generate JSON from YouTube Links</h2>
+
     <label for="title">Judul:</label>
     <input type="text" id="title" placeholder="Masukkan judul" style="width: 100%; margin-bottom: 10px;">
 
@@ -22,10 +23,14 @@
 
     <button type="button" onclick="generateInputs()">Generate Textbox</button>
 
+    <h3>Load Existing JSON:</h3>
+    <textarea id="loadJson" placeholder="Masukkan JSON yang sudah ada..." style="width: 100%;"></textarea>
+    <button type="button" onclick="loadJSON()">Load JSON</button>
+
     <div id="video-inputs"></div>
 
     <button type="button" onclick="generateJSON()">Generate JSON</button>
-    
+
     <h3>Generated JSON:</h3>
     <textarea id="output" readonly></textarea>
     <button type="button" onclick="copyToClipboard()">Salin</button>
@@ -57,13 +62,14 @@
         }
 
         function getYouTubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\\w\/|embed\/|watch\\?v=|&v=)([^#&?]*).*/;
+            // Support both youtu.be and youtube.com/watch?v= links, including those with parameters
+            const regExp = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
             const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+            return (match && match[1]) ? match[1] : null;
         }
 
         function generateJSON() {
-            const title = document.getElementById('title').value || "Enter the title";
+            const title = document.getElementById('title').value || "(Ini nanti bisa di ganti, ini judul)";
             const videoLinks = document.querySelectorAll('.video-link');  // Ambil semua input video-link
             const jsonData = {};
             jsonData[title] = [];
@@ -84,6 +90,29 @@
             output.select();
             document.execCommand("copy");
             alert("Hasil JSON sudah disalin ke clipboard Desu!");
+        }
+
+        function loadJSON() {
+            try {
+                const jsonString = document.getElementById('loadJson').value;
+                const jsonData = JSON.parse(jsonString);
+                const title = Object.keys(jsonData)[0];  // Ambil judul dari JSON
+                const videos = jsonData[title];  // Ambil array video dari JSON
+                
+                // Isi title dari JSON
+                document.getElementById('title').value = title;
+
+                // Isi link YouTube berdasarkan videoId dari JSON
+                const videoLinks = document.querySelectorAll('.video-link');  // Ambil semua input video-link
+
+                videos.forEach((video, index) => {
+                    if (videoLinks[index]) {
+                        videoLinks[index].value = `https://www.youtube.com/watch?v=${video.videoId}`;
+                    }
+                });
+            } catch (error) {
+                alert('Gagal memuat JSON. Pastikan format JSON sudah benar Desu!');
+            }
         }
     </script>
 </body>
