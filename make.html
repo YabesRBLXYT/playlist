@@ -69,7 +69,7 @@
         }
 
         function generateJSON() {
-            const title = document.getElementById('title').value || "Enter the title";
+            const title = document.getElementById('title').value || "Enter the link";
             const videoLinks = document.querySelectorAll('.video-link');  // Ambil semua input video-link
             const jsonData = {};
             jsonData[title] = [];
@@ -82,7 +82,8 @@
                 }
             });
 
-            document.getElementById('output').value = JSON.stringify(jsonData, null, 2);
+            // Menghasilkan JSON dengan format satu baris
+            document.getElementById('output').value = JSON.stringify(jsonData, null, 2).replace(/\n\s+/g, ' ');
         }
 
         function copyToClipboard() {
@@ -117,3 +118,5 @@
     </script>
 </body>
 </html>
+
+            });
