@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Video Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .input-group { margin-bottom: 15px; display: flex; align-items: center; }
+        .input-group input { margin-right: 10px; width: 80%; }
+        button { padding: 5px 10px; }
+        textarea { width: 100%; height: 150px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h2>Generate JSON from YouTube Links</h2>
+    <label for="title">Judul:</label>
+    <input type="text" id="title" placeholder="Masukkan judul" style="width: 100%; margin-bottom: 10px;">
+
+    <label for="numLinks">Jumlah Link YouTube:</label>
+    <input type="number" id="numLinks" min="1" value="1" style="width: 100%; margin-bottom: 10px;">
+
+    <button type="button" onclick="generateInputs()">Generate Textbox</button>
+
+    <div id="video-inputs"></div>
+
+    <button type="button" onclick="generateJSON()">Generate JSON</button>
+    
+    <h3>Generated JSON:</h3>
+    <textarea id="output" readonly></textarea>
+    <button type="button" onclick="copyToClipboard()">Salin</button>
+
+    <script>
+        function generateInputs() {
+            const videoInputs = document.getElementById('video-inputs');
+            videoInputs.innerHTML = ''; // Bersihkan input sebelumnya
+            const numLinks = document.getElementById('numLinks').value;
+
+            for (let i = 0; i < numLinks; i++) {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+                inputGroup.innerHTML = `
+                    <input type="text" class="video-link" placeholder="Masukkan link YouTube ${i + 1}">
+                    <button type="button" onclick="pasteLink(this)">Tempel</button>
+                `;
+                videoInputs.appendChild(inputGroup);
+            }
+        }
+
+        function pasteLink(button) {
+            navigator.clipboard.readText().then(text => {
+                const input = button.previousElementSibling;
+                input.value = text;
+            }).catch(err => {
+                console.error('Failed to read clipboard: ', err);
+            });
+        }
+
+        function getYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\\w\/|embed\/|watch\\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function generateJSON() {
+            const title = document.getElementById('title').value || "Enter the title";
+            const videoLinks = document.querySelectorAll('.video-link');  // Ambil semua input video-link
+            const jsonData = {};
+            jsonData[title] = [];
+
+            videoLinks.forEach(link => {
+                const url = link.value.trim();
+                const videoId = getYouTubeId(url);
+                if (videoId) {
+                    jsonData[title].push({ videoId: videoId });
+                }
+            });
+
+            document.getElementById('output').value = JSON.stringify(jsonData, null, 2);
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand("copy");
+            alert("Hasil JSON sudah disalin ke clipboard Desu!");
+        }
+    </script>
+</body>
+</html>
