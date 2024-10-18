@@ -62,14 +62,14 @@
         }
 
         function getYouTubeId(url) {
-            // Support both youtu.be and youtube.com/watch?v= links, including those with parameters
-            const regExp = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            // Regex yang mendukung format YouTube lengkap termasuk mobile, playlist, dan parameter tambahan
+            const regExp = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
             const match = url.match(regExp);
             return (match && match[1]) ? match[1] : null;
         }
 
         function generateJSON() {
-            const title = document.getElementById('title').value || "Enter the link";
+            const title = document.getElementById('title').value || "Enter the title";
             const videoLinks = document.querySelectorAll('.video-link');  // Ambil semua input video-link
             const jsonData = {};
             jsonData[title] = [];
@@ -118,5 +118,3 @@
     </script>
 </body>
 </html>
-
-            });
