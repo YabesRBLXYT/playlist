@@ -17,5 +17,15 @@
     { "videoId": "HZSxnwy-KnM" }, 
     { "videoId": "nl5mKiFrumI" }, 
     { "videoId": "MF-_L_XTN5c" } 
+  ],
+  "playlist1": [
+    { "videoId": "dQw4w9WgXcQ" }, 
+    { "videoId": "9bZkp7q19f0" }, 
+    { "videoId": "3JZ_D3ELwOQ" }
+  ],
+  "playlist2": [
+    { "videoId": "tVj0ZTS4WF4" }, 
+    { "videoId": "RgKAFK5djSk" }, 
+    { "videoId": "uelHwf8o7_U" }
   ]
 }
