@@ -81,8 +81,8 @@
             fetch('playlist.json')
                 .then(response => response.json())
                 .then(data => {
-                    // Get the playlist based on the hash
-                    const playlist = data[hash];
+                    // Get the playlist based on the new format
+                    const playlist = data.Test; // "Test" is the new key in the JSON
                     if (playlist) {
                         playlistData = playlist;
                         currentVideoIndex = 0;
@@ -115,10 +115,8 @@
             }
         });
 
-        // Function to load and play video by videoId with Indonesian subtitles
+        // Function to load and play video by videoId
         function loadVideo(videoId) {
-            const youtubeSrc = `https://www.youtube.com/embed/${videoId}?cc_lang_pref=id&cc_load_policy=1`;
-            
             if (player) {
                 player.loadVideoById(videoId);
             } else {
@@ -161,24 +159,6 @@
             }
         });
 
-        // Load and display playlist links on index (without hash)
-        function loadPlaylistLinks() {
-            fetch('playlist.json')
-                .then(response => response.json())
-                .then(data => {
-                    playlistLinksContainer.innerHTML = ''; // Clear previous links
-                    Object.keys(data).forEach(playlist => {
-                        const li = document.createElement('li');
-                        const a = document.createElement('a');
-                        a.href = `#${playlist}`;
-                        a.textContent = `Go to ${playlist}`;
-                        li.appendChild(a);
-                        playlistLinksContainer.appendChild(li);
-                    });
-                })
-                .catch(error => console.error('Error loading playlist links:', error));
-        }
-
         // Load YouTube Iframe API
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -196,11 +176,6 @@
             const hash = location.hash.substring(1);
             loadPlaylist(hash);
         });
-
-        // Load playlist links when on index page (without hash)
-        if (!location.hash) {
-            loadPlaylistLinks();
-        }
 
         window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     </script>
